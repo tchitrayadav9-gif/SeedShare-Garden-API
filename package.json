@@ -1,0 +1,27 @@
+{
+  "name": "seedshare-garden-api",
+  "version": "1.0.0",
+  "description": "Backend Development Fundamentals Group Assignment - SeedShare Garden API (Theme 17: Garden Plots)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:init": "node src/db/initDb.js",
+    "db:seed": "node src/db/seed.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "express",
+    "sqlite3",
+    "rest-api",
+    "backend-development-fundamentals"
+  ],
+  "author": "Group 5 Members",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "sqlite3": "^6.0.1"
+  }
+}

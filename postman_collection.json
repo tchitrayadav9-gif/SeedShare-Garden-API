@@ -1,0 +1,600 @@
+{
+  "info": {
+    "_postman_id": "b3e0c7a1-8d29-4d62-9e32-15db8bcf0402",
+    "name": "SeedShare Garden API (Theme 17)",
+    "description": "Postman test collection for SeedShare Garden API backend assignment.\nCovers: Express server, SQLite DB, Plots CRUD, Validation, Query Param Search, SQL JOIN Endpoint, and the Twist (Summary by Soil using GROUP BY).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health & Overview",
+      "item": [
+        {
+          "name": "GET API Welcome & Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Project details returned\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.project).to.eql(\"SeedShare Garden API\");",
+                  "    pm.expect(json.status).to.eql(\"online\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Twist Rule - Summary by Soil (Task 5)",
+      "item": [
+        {
+          "name": "GET /plots/summary (Twist: GROUP BY count)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plots/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots", "summary"]
+            },
+            "description": "Twist Test 2: Returns how many plots sit in each soil using GROUP BY."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns array of soil counts\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0]).to.have.property('soil');",
+                  "        pm.expect(json[0]).to.have.property('count');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Plots CRUD & Search (Tasks 3 & 4)",
+      "item": [
+        {
+          "name": "GET All Plots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plots",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Plots Filtered by Soil (?soil=Loam)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plots?soil=Loam",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots"],
+              "query": [
+                {
+                  "key": "soil",
+                  "value": "Loam"
+                }
+              ]
+            },
+            "description": "Requirement: Search by a query parameter, for example plots by soil."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"All returned plots have soil Loam\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    json.forEach(function(item) {",
+                  "        pm.expect(item.soil.toLowerCase()).to.eql('loam');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Single Plot by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plots/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returned plot has id, name, and soil\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id', 1);",
+                  "    pm.expect(json).to.have.property('name');",
+                  "    pm.expect(json).to.have.property('soil');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create New Plot - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sunflower Meadow Patch 6\",\n  \"soil\": \"Sandy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plots",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response contains created plot with assigned ID\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json.name).to.eql(\"Sunflower Meadow Patch 6\");",
+                  "    pm.expect(json.soil).to.eql(\"Sandy\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Plot - Validation Failure (Missing Soil)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Incomplete Plot\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plots",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots"]
+            },
+            "description": "Validation Requirement: Validation on add and update, with a clear error message."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Clear validation error message returned\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('error', 'Validation failed');",
+                  "    pm.expect(json.message).to.include('soil');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Plot - Validation Failure (Empty Name)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"   \",\n  \"soil\": \"Clay\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plots",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error specifies name cannot be empty\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('name');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update Plot",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Plot 1 - North Ridge (Enriched)\",\n  \"soil\": \"Loam\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plots/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Plot updated successfully\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.name).to.eql(\"Plot 1 - North Ridge (Enriched)\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Plot by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plots/5",
+              "host": ["{{baseUrl}}"],
+              "path": ["plots", "5"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Delete confirmation message returned\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql(\"Plot deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Leases (SQL JOIN Endpoint - Tasks 1 & 3)",
+      "item": [
+        {
+          "name": "GET Leases with Gardener Name & Plot Name (JOIN Endpoint)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leases",
+              "host": ["{{baseUrl}}"],
+              "path": ["leases"]
+            },
+            "description": "Requirement: One join endpoint: leases with the gardener name and the plot name."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Includes joined gardener name and plot name\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    if (json.length > 0) {",
+                  "        var first = json[0];",
+                  "        pm.expect(first).to.have.property('gardener_name');",
+                  "        pm.expect(first).to.have.property('plot_name');",
+                  "        pm.expect(first).to.have.property('plot_soil');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Single Lease with JOIN details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leases/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["leases", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Lease has gardener and plot names\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('gardener_name');",
+                  "    pm.expect(json).to.have.property('plot_name');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Lease",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gardener_id\": 3,\n  \"plot_id\": 3,\n  \"start_date\": \"2026-06-01\",\n  \"end_date\": \"2026-11-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leases",
+              "host": ["{{baseUrl}}"],
+              "path": ["leases"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Lease joins gardener and plot details on response\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('gardener_name');",
+                  "    pm.expect(json).to.have.property('plot_name');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Lease Conflict (Two Gardeners Same Plot Prevention)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gardener_id\": 2,\n  \"plot_id\": 1,\n  \"start_date\": \"2026-07-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leases",
+              "host": ["{{baseUrl}}"],
+              "path": ["leases"]
+            },
+            "description": "Fixes scenario: 'Two gardeners were promised the same plot'."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request on duplicate active lease\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Conflict explanation in message\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.include('Conflict');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Gardeners CRUD (Tasks 1 & 3)",
+      "item": [
+        {
+          "name": "GET All Gardeners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gardeners",
+              "host": ["{{baseUrl}}"],
+              "path": ["gardeners"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Create Gardener",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"David Miller\",\n  \"email\": \"david.miller@example.com\",\n  \"phone\": \"555-0104\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gardeners",
+              "host": ["{{baseUrl}}"],
+              "path": ["gardeners"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Gardener created with id\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json.email).to.eql(\"david.miller@example.com\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
